@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WASD Enterprise – дигитални книги онлайн</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Unbounded:wght@600;700&display=swap&subset=cyrillic">
+<style>
+:root{
+  --bg:#fafbfe;--soft:#f0f2f8;--ink:#0f1629;--muted:#626d8a;--line:#dde1ec;
+  --accent:#f59e0b;--accent2:#f97316;--accent-ink:#0f1629;--card:#ffffff;
+  --success:#10b981;--danger:#ef4444;--info:#3b82f6;
+  --radius:16px;--radius-lg:24px;--shadow:0 4px 24px -6px rgba(15,22,41,.08);
+  --shadow-lg:0 20px 60px -12px rgba(15,22,41,.18);
+  --shadow-xl:0 32px 80px -20px rgba(15,22,41,.22);
+  --glass:rgba(255,255,255,.72);--glass-border:rgba(255,255,255,.4);
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b0f1a;--soft:#131829;--ink:#e8ecf4;--muted:#8892ad;--line:#1e2540;
+  --card:#151b2e;--glass:rgba(21,27,46,.82);--glass-border:rgba(255,255,255,.08);
+  --shadow:0 4px 24px -6px rgba(0,0,0,.3);--shadow-lg:0 20px 60px -12px rgba(0,0,0,.5);
+  --shadow-xl:0 32px 80px -20px rgba(0,0,0,.55)
+}}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,'Segoe UI',sans-serif;font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:8px}
+[hidden]{display:none!important}
+
+/* Layout */
+.wrap{max-width:1140px;margin:0 auto;padding:0 28px}
+@media(max-width:640px){.wrap{padding:0 18px}}
+
+/* Header */
+header{position:sticky;top:0;z-index:100;background:var(--glass);backdrop-filter:blur(20px) saturate(1.4);border-bottom:1px solid var(--glass-border);transition:box-shadow .3s}
+header.scrolled{box-shadow:var(--shadow)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:68px;gap:16px}
+.logo{display:flex;align-items:center;gap:11px;font-family:Unbounded,Verdana,sans-serif;font-weight:700;font-size:16px;letter-spacing:-.01em}
+.mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#f59e0b,#f97316);color:#0f1629;display:grid;place-items:center;font-size:15px;font-weight:800;box-shadow:0 2px 8px rgba(245,158,11,.35)}
+nav{display:flex;gap:28px}
+nav a{color:var(--muted);font-size:15px;font-weight:500;position:relative;padding:4px 0;transition:color .2s}
+nav a::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:2px;background:var(--accent);border-radius:1px;transition:width .25s}
+nav a:hover{color:var(--ink)}
+nav a:hover::after{width:100%}
+@media(max-width:720px){nav{display:none}}
+.cartbtn{display:inline-flex;gap:8px;align-items:center;font-weight:600;font-size:14px;padding:10px 18px;border-radius:999px;background:var(--soft);border:1px solid var(--line);transition:all .2s;cursor:pointer}
+.cartbtn:hover{background:var(--card);box-shadow:var(--shadow);transform:translateY(-1px)}
+.cartbtn b{background:linear-gradient(135deg,#f59e0b,#f97316);color:#0f1629;min-width:22px;height:22px;border-radius:11px;display:inline-grid;place-items:center;font-size:12px;padding:0 6px;font-weight:700}
+@keyframes bump{40%{transform:scale(1.3)}}
+.cartbtn b.bump{animation:bump .35s ease}
+
+/* Hero */
+.hero{padding:100px 0 80px;overflow:hidden}
+.hero .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:64px;align-items:center}
+@media(max-width:860px){.hero{padding:64px 0 56px}.hero .wrap{grid-template-columns:1fr;gap:48px;text-align:center}}
+h1{font-family:Unbounded,Verdana,sans-serif;font-size:clamp(32px,5vw,52px);line-height:1.08;letter-spacing:-.03em;font-weight:700;margin:0 0 20px}
+h1 span{background:linear-gradient(135deg,#f59e0b,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.lead{font-size:18px;color:var(--muted);margin:0 0 36px;max-width:32em;line-height:1.65}
+.btns{display:flex;gap:14px;flex-wrap:wrap}
+@media(max-width:860px){.btns{justify-content:center}.lead{margin-inline:auto}}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:15px 28px;border-radius:14px;font-weight:600;font-size:16px;border:1px solid transparent;transition:all .25s;cursor:pointer}
+.btn.p{background:linear-gradient(135deg,#f59e0b,#f97316);color:#0f1629;box-shadow:0 4px 16px -4px rgba(245,158,11,.4)}
+.btn.p:hover{transform:translateY(-2px);box-shadow:0 8px 24px -4px rgba(245,158,11,.5);filter:brightness(1.05)}
+.btn.s{border-color:var(--line);color:var(--ink);background:var(--card)}
+.btn.s:hover{background:var(--soft);transform:translateY(-2px);box-shadow:var(--shadow)}
+.btn.big{font-size:18px;padding:18px 40px;border-radius:16px}
+
+/* Book Stack */
+.stack{position:relative;height:380px}
+@media(max-width:860px){.stack{max-width:360px;margin:0 auto}}
+.bk{position:absolute;width:180px;height:260px;border-radius:6px 16px 16px 6px;padding:22px 20px;color:#fff;font-weight:700;font-size:19px;line-height:1.2;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow-lg);border-left:8px solid rgba(0,0,0,.2);transition:transform .4s ease}
+.bk small{font-weight:500;font-size:12px;opacity:.8;letter-spacing:.03em}
+.bk.a{left:0;top:50px;transform:rotate(-8deg);background:linear-gradient(145deg,#3b5cb8,#2c4a8f)}
+.bk.b{left:85px;top:10px;transform:rotate(2deg);background:linear-gradient(145deg,#1f9d7a,#1a6b56);z-index:2}
+.bk.c{left:175px;top:60px;transform:rotate(10deg);background:linear-gradient(145deg,#b8486a,#8d3d52)}
+.bk:hover{transform:translateY(-8px) rotate(0deg)!important;box-shadow:var(--shadow-xl)}
+@keyframes bob{50%{translate:0 -10px}}
+.bk{animation:bob 5s ease-in-out infinite}.bk.b{animation-delay:-1.6s}.bk.c{animation-delay:-3.2s}
+.chip{position:absolute;right:-8px;bottom:0;z-index:3;width:230px;background:var(--glass);backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:16px;padding:14px 18px;font-size:14px;box-shadow:var(--shadow-lg)}
+.chip b{display:flex;align-items:center;gap:8px}
+.chip .ok-dot{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--success);color:#fff;font-size:11px}
+@keyframes pulse{0%,70%{opacity:0;scale:.6}80%,100%{opacity:1;scale:1}}
+.chip .ok-dot{animation:pulse 3.6s ease-in-out infinite}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,#f59e0b,#f97316)}
+@keyframes fill{0%{width:0}70%,100%{width:100%}}
+.bar i{animation:fill 3.6s ease-in-out infinite}
+@media(max-width:440px){.bk{width:140px;height:200px;font-size:15px}.bk.b{left:60px}.bk.c{left:125px}.stack{height:280px}}
+
+/* Facts */
+.facts{background:var(--soft);border-block:1px solid var(--line)}
+.facts .wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px;padding-block:36px}
+.facts>div{text-align:center}
+.fact-icon{font-size:28px;margin-bottom:8px}
+.facts b{display:block;font-size:16px;margin-bottom:2px}
+.facts span{color:var(--muted);font-size:14px}
+
+/* Sections */
+section{padding:88px 0}
+h2{font-family:Unbounded,Verdana,sans-serif;font-size:clamp(24px,3.4vw,34px);line-height:1.15;letter-spacing:-.02em;font-weight:700;margin:0 0 12px}
+.sub{color:var(--muted);margin:0 0 40px;max-width:36em;font-size:17px}
+.alt{background:var(--soft)}
+
+/* Categories */
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.cat{display:flex;gap:18px;align-items:center;padding:22px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);transition:all .3s;cursor:pointer}
+.cat:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:transparent}
+.sw{flex:none;width:48px;height:64px;border-radius:4px 10px 10px 4px;border-left:5px solid rgba(0,0,0,.18);transition:transform .3s}
+.cat:hover .sw{transform:rotate(-6deg)}
+.cat h3{margin:0;font-size:16px;font-weight:600}
+.cat p{margin:4px 0 0;color:var(--muted);font-size:14px;line-height:1.45}
+
+/* Steps */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px;counter-reset:s;padding:0;list-style:none;margin:0}
+.steps li{counter-increment:s;padding:28px;border-radius:var(--radius);background:var(--card);border:1px solid var(--line);transition:all .3s}
+.steps li:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#f97316);color:#0f1629;font-weight:700;margin-bottom:16px;font-size:15px}
+.steps h3{margin:0 0 6px;font-size:17px;font-weight:600}
+.steps p{margin:0;color:var(--muted);font-size:14px;line-height:1.55}
+
+/* FAQ */
+details{border-bottom:1px solid var(--line);padding:20px 0}
+summary{cursor:pointer;font-weight:600;font-size:16px;list-style:none;display:flex;justify-content:space-between;gap:16px;transition:color .2s}
+summary::-webkit-details-marker{display:none}
+summary::after{content:'+';font-size:22px;line-height:1;color:var(--muted);transition:transform .3s}
+details[open] summary::after{content:'−';transform:rotate(180deg)}
+summary:hover{color:var(--accent)}
+details p{margin:12px 0 0;color:var(--muted);max-width:42em;font-size:15px}
+
+/* Contact */
+.contact{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+@media(max-width:760px){.contact{grid-template-columns:1fr}}
+dl{margin:0;display:grid;grid-template-columns:max-content 1fr;gap:14px 28px;font-size:15px}
+dt{color:var(--muted);font-weight:500}dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+
+/* Devices section */
+.devs{padding:72px 0 8px}
+.devs svg{display:block;width:100%;max-width:720px;height:auto;margin:0 auto}
+.devs .ln{fill:#fff;opacity:.55}
+.devs .shim{fill:url(#sh)}
+.devs h2,.devs .sub{text-align:center;margin-inline:auto}
+
+/* Scenes */
+.scenes{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.scene{margin:0;border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--line);background:var(--card);transition:all .3s}
+.scene:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.scene svg{display:block;width:100%;height:auto}
+.scene figcaption{padding:16px 20px;color:var(--muted);font-size:14px}
+.scene figcaption b{color:var(--ink);display:block;font-size:15px}
+
+/* Catalog */
+.cat-top{padding:40px 0 8px}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-weight:500;font-size:15px;margin-bottom:24px;transition:color .2s}
+.back:hover{color:var(--ink)}
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 32px}
+.chip2{padding:9px 18px;border-radius:999px;border:1px solid var(--line);font-size:14px;font-weight:500;color:var(--muted);transition:all .2s;background:var(--card)}
+.chip2:hover{background:var(--soft);color:var(--ink);transform:translateY(-1px)}
+.chip2.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+/* Shelf / items */
+.shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:24px;padding-bottom:80px}
+.item{display:flex;flex-direction:column;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;transition:all .3s}
+.item:hover{box-shadow:var(--shadow-lg);transform:translateY(-4px);border-color:transparent}
+.item .cv{aspect-ratio:3/4;border-radius:6px 14px 14px 6px;border-left:8px solid rgba(0,0,0,.2);padding:20px 18px;color:#fff;font-weight:700;font-size:18px;line-height:1.2;display:flex;align-items:flex-end;box-shadow:var(--shadow);transition:transform .3s;position:relative;overflow:hidden}
+.item .cv img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.item .cv span{position:relative;z-index:1;text-shadow:0 2px 8px rgba(0,0,0,.6)}
+.item:hover .cv{transform:translateY(-4px) rotate(-1.5deg)}
+.item h3{margin:0;font-size:16px;line-height:1.3;font-weight:600}
+.item p{margin:0;color:var(--muted);font-size:13px}
+.item .pr{font-weight:700;font-size:20px;margin:4px 0 0;background:linear-gradient(135deg,#f59e0b,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.item-btns{display:flex;gap:8px;margin-top:auto}
+.item-btns button{flex:1;font:inherit;font-weight:600;font-size:13px;padding:10px 8px;border:0;border-radius:10px;cursor:pointer;transition:all .2s}
+.item-btns .add-btn{background:linear-gradient(135deg,#f59e0b,#f97316);color:#0f1629}
+.item-btns .add-btn:hover{filter:brightness(1.05);transform:translateY(-1px);box-shadow:0 4px 12px -2px rgba(245,158,11,.4)}
+.item-btns .add-btn.in{background:var(--success);color:#fff}
+.item-btns .add-btn.in:hover{filter:brightness(1.05)}
+.item-btns .browse-btn{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+.item-btns .browse-btn:hover{background:var(--card);box-shadow:var(--shadow);transform:translateY(-1px)}
+
+/* Checkout */
+.co{display:grid;grid-template-columns:1.2fr .8fr;gap:48px;align-items:start;padding-bottom:80px}
+@media(max-width:860px){.co{grid-template-columns:1fr;gap:32px}.sum{order:-1}}
+.co form{display:grid;gap:20px}
+.fld label{display:block;font-weight:600;font-size:14px;margin-bottom:8px;color:var(--muted)}
+.fld input[type=text],.fld input[type=email]{width:100%;font:inherit;font-size:16px;padding:14px 18px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);transition:all .2s}
+.fld input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(245,158,11,.12)}
+.chk{display:flex;gap:12px;align-items:flex-start;color:var(--muted);font-size:14px;line-height:1.5}
+.chk input{margin-top:4px;width:20px;height:20px;accent-color:#f59e0b;border-radius:4px}
+.sum{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);padding:28px;position:sticky;top:88px;box-shadow:var(--shadow)}
+.sum h3{margin:0 0 20px;font-size:18px;font-weight:700}
+.sum ul{list-style:none;margin:0;padding:0}
+.sum li{display:flex;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:flex-start}
+.sum li small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.sum li .rm{background:none;border:0;color:var(--danger);cursor:pointer;font:inherit;font-size:12px;padding:0;text-decoration:underline;opacity:.7;transition:opacity .2s}
+.sum li .rm:hover{opacity:1}
+.tot{display:flex;justify-content:space-between;font-size:22px;font-weight:700;padding-top:20px}
+.sum>p{color:var(--muted);font-size:13px;margin:14px 0 0}
+.ok-msg{display:none;padding:18px;border-radius:14px;background:#ecfdf5;color:#065f46;font-size:15px;font-weight:500;border:1px solid #a7f3d0}
+.ok-msg.show{display:block}
+.sumup-info{margin-top:16px;padding:16px;border-radius:12px;background:var(--soft);border:1px solid var(--line);font-size:13px;color:var(--muted)}
+.sumup-info b{color:var(--ink);display:block;margin-bottom:4px;font-size:14px}
+
+/* SumUp badge */
+.sumup-badge{display:flex;align-items:center;gap:10px;margin-top:16px;padding:14px 18px;border-radius:14px;background:linear-gradient(135deg,#001b38,#003366);color:#fff;font-size:14px;font-weight:500}
+.sumup-badge svg{flex:none}
+.sumup-badge span{font-weight:600}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);place-items:center;padding:24px;opacity:0;transition:opacity .3s}
+.modal-overlay.open{display:grid;opacity:1}
+.modal{background:var(--card);border-radius:var(--radius-lg);max-width:520px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-xl);transform:scale(.95);transition:transform .3s;padding:0}
+.modal-overlay.open .modal{transform:scale(1)}
+.modal-header{display:flex;justify-content:space-between;align-items:flex-start;padding:28px 28px 0;gap:16px}
+.modal-header h3{font-size:20px;font-weight:700;margin:0;line-height:1.3}
+.modal-close{background:var(--soft);border:1px solid var(--line);width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer;font-size:18px;color:var(--muted);transition:all .2s;flex:none}
+.modal-close:hover{background:var(--line);color:var(--ink)}
+.modal-body{padding:20px 28px 28px}
+.modal-cover{width:100%;aspect-ratio:3/2;border-radius:12px;margin-bottom:20px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:24px;text-align:center;padding:24px;line-height:1.2;border-left:10px solid rgba(0,0,0,.2);position:relative;overflow:hidden}
+.modal-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.modal-cover span{position:relative;z-index:1;text-shadow:0 2px 10px rgba(0,0,0,.7)}
+.modal-desc{color:var(--muted);font-size:15px;line-height:1.7;margin-bottom:20px}
+.modal-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.modal-meta div{padding:12px;border-radius:10px;background:var(--soft);font-size:13px}
+.modal-meta div b{display:block;color:var(--ink);font-size:14px}
+.modal-meta div span{color:var(--muted)}
+.modal-price{font-size:26px;font-weight:800;background:linear-gradient(135deg,#f59e0b,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px}
+.modal-add{width:100%;font:inherit;font-weight:700;font-size:16px;padding:16px;border:0;border-radius:14px;background:linear-gradient(135deg,#f59e0b,#f97316);color:#0f1629;cursor:pointer;transition:all .2s}
+.modal-add:hover{filter:brightness(1.05);transform:translateY(-2px);box-shadow:0 8px 24px -4px rgba(245,158,11,.4)}
+.modal-add.in{background:var(--success);color:#fff}
+
+/* Reveal animation */
+.rv{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+.rv.in{opacity:1;transform:none}
+
+/* Footer */
+footer{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-size:13px}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:center}
+footer a{color:var(--accent);font-weight:500}
+
+/* Animations */
+@keyframes tw{50%{opacity:.2}}
+@keyframes steam{0%{opacity:0;translate:0 4px}40%{opacity:.8}100%{opacity:0;translate:0 -14px}}
+@keyframes glow{50%{opacity:.28}}
+@keyframes spin{to{rotate:360deg}}
+.tw{animation:tw 3s ease-in-out infinite}
+.st{animation:steam 3s ease-in infinite}
+.gl{animation:glow 5s ease-in-out infinite}
+.rays{transform-box:fill-box;transform-origin:center;animation:spin 50s linear infinite}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .bk,.bar i,.chip .ok-dot,.tw,.st,.gl,.rays{animation:none}
+  .bar i{width:100%}
+  .rv{opacity:1;transform:none;transition:none}
+}
+
+/* Gradient blob hero deco */
+.hero-deco{position:absolute;top:-120px;right:-120px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,.12) 0%,transparent 70%);pointer-events:none;z-index:-1}
+.hero .wrap{position:relative}
+</style>
+</head>
+<body>
+<header>
+<div class="wrap">
+<a class="logo" href="#top"><span class="mark" aria-hidden="true">W</span>WASD Enterprise</a>
+<nav aria-label="Основно меню">
+  <a href="#books">Книги</a>
+  <a href="#how">Как работи</a>
+  <a href="#faq">Въпроси</a>
+  <a href="#contact">Контакти</a>
+</nav>
+<a class="cartbtn" href="#checkout" aria-label="Количка">
+  🛒 Количка <b id="cc">0</b>
+</a>
+</div>
+</header>
+
+<main id="top">
+<div class="hero"><div class="wrap">
+<div class="hero-deco" aria-hidden="true"></div>
+<div>
+<h1>Дигитални книги.<br><span>Купувате и четете веднага.</span></h1>
+<p class="lead">WASD Enterprise е онлайн книжарница с електронни книги. Плащате бързо и сигурно със SumUp и получавате книгата на имейла си — без чакане, без доставка.</p>
+<div class="btns">
+  <a class="btn p" href="#all">📚 Разгледайте книгите</a>
+  <a class="btn s" href="#how">Как работи →</a>
+</div>
+</div>
+<div class="stack" aria-hidden="true">
+  <div class="bk a"><span>Романи</span><small>EPUB · PDF</small></div>
+  <div class="bk b"><span>Фантастика</span><small>EPUB · PDF</small></div>
+  <div class="bk c"><span>Развитие</span><small>EPUB · PDF</small></div>
+  <div class="chip"><b><span class="ok-dot">✓</span>Книгата е изпратена</b><div class="bar"><i></i></div></div>
+</div>
+</div></div>
+
+<div class="facts"><div class="wrap">
+  <div><div class="fact-icon">⚡</div><b>Моментално</b><span>Получавате книгата веднага</span></div>
+  <div><div class="fact-icon">🔒</div><b>Сигурно плащане</b><span>Защитено плащане със SumUp</span></div>
+  <div><div class="fact-icon">📱</div><b>Всяко устройство</b><span>Телефон, таблет, компютър</span></div>
+  <div><div class="fact-icon">💰</div><b>Без скрити такси</b><span>Плащате само за книгата</span></div>
+</div></div>
+
+<section class="devs"><div class="wrap">
+<h2>Една книга. Всяко устройство.</h2>
+<p class="sub">Файлът се отваря на телефон, таблет и компютър — продължавате да четете там, където ви е удобно.</p>
+<svg viewBox="0 0 720 300" role="img" aria-label="Електронна книга на таблет, лаптоп и телефон">
+<defs><linearGradient id="sh" gradientUnits="userSpaceOnUse" x1="0" x2="200"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+<ellipse cx="360" cy="282" rx="330" ry="10" fill="#161a2e" opacity=".08"/>
+<g><rect x="20" y="90" width="180" height="186" rx="16" fill="#161a2e"/><rect x="30" y="100" width="160" height="166" rx="8" fill="#2c4a8f"/><rect class="ln" x="46" y="122" width="90" height="10" rx="5"/><rect class="ln" x="46" y="146" width="128" height="6" rx="3"/><rect class="ln" x="46" y="162" width="112" height="6" rx="3"/><rect class="ln" x="46" y="178" width="126" height="6" rx="3"/><rect class="ln" x="46" y="194" width="84" height="6" rx="3"/><rect class="shim" x="30" y="100" width="160" height="166" rx="8"><animateTransform attributeName="transform" type="translate" values="-160 0;160 0" dur="4s" repeatCount="indefinite"/></rect></g>
+<g><rect x="236" y="36" width="260" height="180" rx="12" fill="#161a2e"/><rect x="246" y="46" width="240" height="160" rx="4" fill="#1f7a66"/><rect x="262" y="64" width="90" height="120" rx="4" fill="#fff" opacity=".18"/><rect class="ln" x="372" y="68" width="96" height="9" rx="4"/><rect class="ln" x="372" y="92" width="96" height="6" rx="3"/><rect class="ln" x="372" y="108" width="80" height="6" rx="3"/><rect class="ln" x="372" y="124" width="92" height="6" rx="3"/><rect class="ln" x="372" y="140" width="70" height="6" rx="3"/><rect class="shim" x="246" y="46" width="240" height="160" rx="4"><animateTransform attributeName="transform" type="translate" values="-240 0;240 0" dur="4s" begin="1s" repeatCount="indefinite"/></rect><path d="M210 216h312l-20 24a10 10 0 0 1-8 4H238a10 10 0 0 1-8-4z" fill="#b9c0d0"/></g>
+<g><rect x="548" y="60" width="128" height="216" rx="20" fill="#161a2e"/><rect x="556" y="68" width="112" height="200" rx="14" fill="#8d3d52"/><rect x="598" y="74" width="28" height="6" rx="3" fill="#161a2e"/><rect class="ln" x="572" y="104" width="64" height="10" rx="5"/><rect class="ln" x="572" y="128" width="80" height="6" rx="3"/><rect class="ln" x="572" y="144" width="72" height="6" rx="3"/><rect class="ln" x="572" y="160" width="78" height="6" rx="3"/><rect class="ln" x="572" y="176" width="60" height="6" rx="3"/><rect class="ln" x="572" y="192" width="74" height="6" rx="3"/><rect class="shim" x="556" y="68" width="112" height="200" rx="14"><animateTransform attributeName="transform" type="translate" values="-112 0;112 0" dur="4s" begin="2s" repeatCount="indefinite"/></rect></g>
+</svg>
+</div></section>
+
+<section style="padding-bottom:16px"><div class="wrap">
+<h2>Четете по свой начин</h2>
+<p class="sub">Вечер на уютно кътче или сутрин с кафе пред лаптопа. Книгата е винаги с вас.</p>
+<div class="scenes">
+<figure class="scene">
+<svg viewBox="0 0 400 300" role="img" aria-label="Вечерно четене">
+<rect width="400" height="300" fill="#24305a"/>
+<rect x="40" y="30" width="120" height="130" rx="6" fill="#141b3a" stroke="#e8d9b5" stroke-width="6"/>
+<path d="M100 30v130M40 95h120" stroke="#e8d9b5" stroke-width="4"/>
+<circle cx="128" cy="58" r="13" fill="#f6e7b4"/><circle cx="134" cy="54" r="11" fill="#141b3a"/>
+<g fill="#fff"><circle class="tw" cx="62" cy="52" r="2"/><circle class="tw" cx="84" cy="76" r="1.6" style="animation-delay:-1s"/><circle class="tw" cx="70" cy="128" r="2" style="animation-delay:-2s"/><circle class="tw" cx="132" cy="124" r="1.6" style="animation-delay:-.5s"/></g>
+<rect y="242" width="400" height="58" fill="#3a2d49"/>
+<circle class="gl" cx="318" cy="130" r="95" fill="#f2a33a" opacity=".16"/>
+<path d="M318 112v130" stroke="#c9b78a" stroke-width="5"/><rect x="302" y="238" width="32" height="6" rx="3" fill="#c9b78a"/>
+<path d="M292 112l8-30h36l8 30z" fill="#f2a33a"/>
+<rect x="112" y="150" width="150" height="96" rx="24" fill="#8d3d52"/>
+<rect x="98" y="196" width="178" height="50" rx="16" fill="#a14a62"/>
+<rect x="90" y="176" width="30" height="70" rx="14" fill="#7a3347"/><rect x="254" y="176" width="30" height="70" rx="14" fill="#7a3347"/>
+<rect x="166" y="176" width="46" height="54" rx="14" fill="#2c4a8f"/>
+<circle cx="189" cy="160" r="15" fill="#f0c9a5"/><path d="M174 158c0-14 30-14 30 0c-6-6-24-6-30 0z" fill="#3b2a20"/>
+<g transform="rotate(-12 200 208)"><rect x="186" y="192" width="44" height="32" rx="4" fill="#161a2e"/><rect x="190" y="196" width="36" height="24" rx="2" fill="#1f7a66"/><path d="M194 202h22M194 207h26M194 212h18" stroke="#fff" stroke-opacity=".6" stroke-width="2" stroke-linecap="round"/></g>
+<path d="M208 196l16 14" stroke="#f0c9a5" stroke-width="7" stroke-linecap="round"/>
+<rect x="346" y="214" width="46" height="6" rx="3" fill="#6b4a2f"/><path d="M369 220v24" stroke="#6b4a2f" stroke-width="5"/>
+<rect x="360" y="198" width="18" height="16" rx="3" fill="#f6f1e6"/><path d="M378 202q8 3 0 8" fill="none" stroke="#f6f1e6" stroke-width="3"/>
+<g fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path class="st" d="M365 192q4-5 0-10"/><path class="st" d="M373 192q4-5 0-10" style="animation-delay:-1.4s"/></g>
+<path d="M38 244h38l-5 -34h-28z" fill="#c26a3d"/>
+<g fill="#2f8f5b"><ellipse cx="46" cy="196" rx="9" ry="20" transform="rotate(-25 46 196)"/><ellipse cx="58" cy="190" rx="9" ry="24"/><ellipse cx="70" cy="198" rx="9" ry="20" transform="rotate(25 70 198)"/></g>
+</svg>
+<figcaption><b>Вечер у дома</b>Спокойно четене след работа.</figcaption>
+</figure>
+<figure class="scene">
+<svg viewBox="0 0 400 300" role="img" aria-label="Сутрешно четене">
+<rect width="400" height="300" fill="#fbe6bf"/>
+<rect x="230" y="28" width="130" height="110" rx="6" fill="#bfe3f2" stroke="#fff" stroke-width="6"/>
+<g><g class="rays"><path d="M295 83v-40M295 83v40M295 83h-40M295 83h40" stroke="#f6c36b" stroke-width="4" stroke-linecap="round"/></g><circle cx="295" cy="83" r="20" fill="#f2a33a"/></g>
+<path d="M295 28v110M230 83h130" stroke="#fff" stroke-width="4"/>
+<rect x="24" y="60" width="170" height="8" rx="3" fill="#6b4a2f"/><rect x="24" y="120" width="170" height="8" rx="3" fill="#6b4a2f"/>
+<g><rect x="34" y="24" width="16" height="36" fill="#2c4a8f"/><rect x="52" y="18" width="14" height="42" fill="#8d3d52"/><rect x="68" y="28" width="18" height="32" fill="#1f7a66"/><rect x="88" y="22" width="14" height="38" fill="#b3741a"/><rect x="106" y="30" width="16" height="30" fill="#5b3a86"/><rect x="136" y="26" width="16" height="34" fill="#8d3d52"/><rect x="154" y="20" width="14" height="40" fill="#2c4a8f"/><rect x="124" y="30" width="14" height="30" fill="#1f7a66" transform="rotate(14 131 60)"/>
+<rect x="34" y="84" width="18" height="36" fill="#1f7a66"/><rect x="54" y="80" width="14" height="40" fill="#b3741a"/><rect x="70" y="88" width="16" height="32" fill="#2c4a8f"/><rect x="88" y="82" width="18" height="38" fill="#8d3d52"/><rect x="108" y="90" width="14" height="30" fill="#5b3a86"/></g>
+<rect y="226" width="400" height="74" fill="#e7cf9f"/>
+<rect x="20" y="216" width="360" height="14" rx="3" fill="#6b4a2f"/><path d="M50 230v70M350 230v70" stroke="#6b4a2f" stroke-width="8"/>
+<path d="M104 214l-14 0 8-6h124l8 6z" fill="#b9c0d0"/><rect x="110" y="134" width="172" height="80" rx="6" fill="#161a2e"/><rect x="117" y="141" width="158" height="66" rx="2" fill="#1f7a66"/>
+<rect x="128" y="152" width="50" height="44" rx="2" fill="#fff" opacity=".2"/><path d="M190 156h70M190 168h60M190 180h66M190 192h44" stroke="#fff" stroke-opacity=".65" stroke-width="4" stroke-linecap="round"/>
+<rect x="300" y="190" width="22" height="26" rx="4" fill="#f6f1e6"/><path d="M322 196q11 4 0 12" fill="none" stroke="#f6f1e6" stroke-width="4"/>
+<g fill="none" stroke="#8a6b3f" stroke-width="2.5" stroke-linecap="round"><path class="st" d="M306 182q5-6 0-12"/><path class="st" d="M316 182q5-6 0-12" style="animation-delay:-1.5s"/></g>
+<path d="M334 216h30l-4-26h-22z" fill="#c26a3d"/>
+<g fill="#2f8f5b"><ellipse cx="340" cy="176" rx="7" ry="16" transform="rotate(-20 340 176)"/><ellipse cx="349" cy="170" rx="7" ry="19"/><ellipse cx="358" cy="177" rx="7" ry="16" transform="rotate(20 358 177)"/></g>
+</svg>
+<figcaption><b>Сутрин с кафе</b>Една книга, отворена на лаптопа.</figcaption>
+</figure>
+</div>
+</div></section>
+
+<section id="books"><div class="wrap">
+<h2>Какво ще намерите</h2>
+<p class="sub">Електронни книги в няколко категории. Всяка се предлага във формати, които се отварят на всяко устройство.</p>
+<div class="cats">
+<a class="cat" href="#c-hud"><span class="sw" style="background:linear-gradient(145deg,#3b5cb8,#2c4a8f)"></span><div><h3>Художествена литература</h3><p>Романи и разкази, българска и световна проза</p></div></a>
+<a class="cat" href="#c-fan"><span class="sw" style="background:linear-gradient(145deg,#1f9d7a,#1a6b56)"></span><div><h3>Фантастика и фентъзи</h3><p>Нови и класически заглавия</p></div></a>
+<a class="cat" href="#c-razv"><span class="sw" style="background:linear-gradient(145deg,#b8486a,#8d3d52)"></span><div><h3>Личностно развитие</h3><p>Психология, навици, финанси</p></div></a>
+<a class="cat" href="#c-det"><span class="sw" style="background:linear-gradient(145deg,#d4891e,#b3741a)"></span><div><h3>Детски книги</h3><p>Приказки и четива за малки читатели</p></div></a>
+<a class="cat" href="#c-ucheb"><span class="sw" style="background:linear-gradient(145deg,#7047a3,#5b3a86)"></span><div><h3>Учебна литература</h3><p>Помагала и материали за учене</p></div></a>
+<a class="cat" href="#c-tech"><span class="sw" style="background:linear-gradient(145deg,#4d6076,#3a4a5e)"></span><div><h3>Технологии</h3><p>Програмиране, дизайн, ИТ ръководства</p></div></a>
+</div>
+<p style="text-align:center;margin:48px 0 0"><a class="btn p big" href="#all">📖 Разгледайте всички произведения</a></p>
+</div></section>
+
+<section id="how" class="alt"><div class="wrap">
+<h2>Как работи</h2>
+<p class="sub">Четири стъпки, всички онлайн.</p>
+<ol class="steps">
+<li><h3>Изберете книга</h3><p>Разгледайте каталога или натиснете „Разгледай" за кратко описание на всяка книга.</p></li>
+<li><h3>Добавете в количка</h3><p>Натиснете „Добави в количка" и продължете с избора или отидете на checkout.</p></li>
+<li><h3>Платете със SumUp</h3><p>Въведете данните си и платете бързо и сигурно с карта през SumUp.</p></li>
+<li><h3>Получете книгата</h3><p>Изпращаме линк за изтегляне на вашия имейл веднага след плащането.</p></li>
+</ol>
+</div></section>
+
+<section id="faq"><div class="wrap">
+<h2>Често задавани въпроси</h2>
+<p class="sub">Отговори на най-честите въпроси преди покупка.</p>
+<details><summary>Има ли доставка?</summary><p>Не. Продаваме само електронни книги, така че няма физическа доставка. Получавате книгата като файл по имейл.</p></details>
+<details><summary>Как плащам?</summary><p>С банкова карта (Visa, Mastercard) през SumUp — бързо, сигурно, без регистрация.</p></details>
+<details><summary>В какви формати са книгите?</summary><p>EPUB и PDF. Те се отварят на повечето телефони, таблети, компютри и електронни четци.</p></details>
+<details><summary>Какво да направя, ако не получа файла?</summary><p>Проверете папката със спам. Ако книгата не е там, пишете ни на имейла за контакт и ще я изпратим отново.</p></details>
+<details><summary>Какво е SumUp?</summary><p>SumUp е европейска платежна платформа, лицензирана и регулирана, която гарантира сигурността на вашето плащане. Данните ви са защитени по най-високите стандарти.</p></details>
+</div></section>
+
+<section id="contact" class="alt"><div class="wrap contact">
+<div>
+<h2>Свържете се с нас</h2>
+<p class="sub" style="margin:0">Имате въпрос или търсите конкретно заглавие? Пишете ни и ще отговорим възможно най-скоро.</p>
+<p style="margin-top:28px"><a class="btn p" href="mailto:contact@example.com?subject=Запитване%20за%20книга">✉️ Изпратете имейл</a></p>
+</div>
+<dl>
+<dt>Фирма</dt><dd>WASD Enterprise</dd>
+<dt>Имейл</dt><dd><a href="mailto:contact@example.com">contact@example.com</a></dd>
+<dt>Телефон</dt><dd>+359 000 000 000</dd>
+<dt>Facebook</dt><dd>WASD Enterprise</dd>
+<dt>Дейност</dt><dd>Онлайн продажба на електронни книги</dd>
+</dl>
+</div></section>
+</main>
+
+<!-- Catalog view -->
+<main id="catalog" hidden><div class="wrap">
+<div class="cat-top"><a class="back" href="#books">← Към началото</a>
+<h2 id="ct" style="font-size:clamp(28px,4vw,42px)">Нашите произведения</h2>
+<p class="sub" id="cd" style="margin-bottom:24px"></p>
+<nav class="chips" id="chips" aria-label="Категории"></nav></div>
+<div class="shelf" id="shelf"></div>
+</div></main>
+
+<!-- Checkout view -->
+<main id="checkout" hidden><div class="wrap">
+<div class="cat-top"><a class="back" href="#all">← Продължете с избора</a>
+<h2 style="font-size:clamp(28px,4vw,42px)">🛒 Вашата поръчка</h2></div>
+<div class="co">
+<div>
+<div id="empty" hidden>
+  <p class="sub">Количката е празна. Изберете книги от каталога.</p>
+  <a class="btn p" href="#all">📚 Към произведенията</a>
+</div>
+<form id="cof">
+<div class="fld"><label for="nm">👤 Име и фамилия</label><input id="nm" type="text" autocomplete="name" placeholder="Иван Иванов" required></div>
+<div class="fld"><label for="em">📧 Имейл за получаване на книгите</label><input id="em" type="email" autocomplete="email" placeholder="ivan@example.com" required></div>
+<label class="chk"><input id="ag" type="checkbox" required><span>Съгласен/а съм книгите да бъдат изпратени като файлове по имейл и че при дигитално съдържание няма физическа доставка.</span></label>
+
+<div class="sumup-badge">
+  <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#fff"/><path d="M8 12h16v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-8z" fill="#1A6CFF"/><path d="M8 12a4 4 0 014-4h8a4 4 0 014 4H8z" fill="#1CBFBF"/><circle cx="16" cy="16" r="3" fill="#fff"/></svg>
+  <span>Плащане със SumUp</span> — бързо, сигурно, без регистрация
+</div>
+
+<button class="btn p big" type="submit" style="width:100%;justify-content:center;margin-top:8px">💳 Плати със SumUp</button>
+<p style="margin:0;color:var(--muted);font-size:13px;text-align:center">Ще бъдете пренасочени към защитената страница на SumUp за плащане с карта. След плащането книгите ще пристигнат на имейла ви.</p>
+<div class="ok-msg" id="okm" role="status">✅ Поръчката е изпратена! Ще получите линк за плащане на имейла си.</div>
+</form>
+</div>
+<aside class="sum" aria-label="Обобщение на поръчката">
+  <h3>📋 Обобщение</h3>
+  <ul id="lines"></ul>
+  <div class="tot"><span>Общо</span><span id="tot">0,00 лв.</span></div>
+  <p>Електронни книги · без доставка · цените са в лева.</p>
+  <div class="sumup-info">
+    <b>🔒 Защитено плащане</b>
+    Плащането се обработва от SumUp — лицензирана платежна платформа в ЕС. Вашите данни са защитени с TLS криптиране.
+  </div>
+</aside>
+</div>
+</div></main>
+
+<!-- Book Preview Modal -->
+<div class="modal-overlay" id="modal">
+<div class="modal">
+  <div class="modal-header">
+    <h3 id="modal-title"></h3>
+    <button class="modal-close" id="modal-close" aria-label="Затвори">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="modal-cover" id="modal-cover"></div>
+    <div class="modal-desc" id="modal-desc"></div>
+    <div class="modal-meta">
+      <div><b id="modal-cat"></b><span>Категория</span></div>
+      <div><b>EPUB, PDF</b><span>Формати</span></div>
+    </div>
+    <div class="modal-price" id="modal-price"></div>
+    <button class="modal-add" id="modal-add">Добави в количка</button>
+  </div>
+</div>
+</div>
+
+<footer><div class="wrap">
+<span>© 2026 WASD Enterprise. Всички права запазени.</span>
+<span>Плащания чрез <a href="https://sumup.com" target="_blank" rel="noopener">SumUp</a></span>
+</div></footer>
+
+<script>
+(function(){
+
+/* Scroll header shadow */
+var hdr=document.querySelector('header');
+window.addEventListener('scroll',function(){hdr.classList.toggle('scrolled',window.scrollY>10)},{passive:true});
+
+/* Reveal on scroll */
+var els=document.querySelectorAll('.cat,.steps li,details,.facts .wrap>div,.devs svg,.scene');
+if('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.15});
+  els.forEach(function(el,i){el.classList.add('rv');el.style.transitionDelay=(i%4)*80+'ms';io.observe(el)});
+}
+
+/* Data — books with descriptions and cover images */
+var IMG='covers/';
+var C=[
+{id:'c-hud',n:'Художествена литература',d:'Романи и разкази, българска и световна проза.',c:'#2c4a8f',g:'linear-gradient(145deg,#3b5cb8,#2c4a8f)',t:[
+  ['Къщата на дъжда',12.99,'Мистериозен роман за стара къща в планината, където дъждът никога не спира. Младо семейство наследява имота и постепенно разкрива тайните, скрити зад стените — спомени, любов и непростени грешки от миналото.',null],
+  ['Писма до Мара',9.99,'Трогателна история, разказана чрез писма, които никога не са изпратени. Един мъж преосмисля живота си, връзката с дъщеря си и годините, изгубени в мълчание. Роман за прошката и втория шанс.','pisma-do-mara.jpg'],
+  ['Последният влак',14.99,'Пътуване с последния нощен влак от София до морето се превръща в неочаквана среща между непознати. Всеки пътник носи история, а нощта ги свързва по начин, по който денят никога не би могъл.',null],
+  ['Огледалото на Елена',11.99,'Елена открива старинно огледало на тавана, което показва сцени от живота на жена, живяла преди век. Успоредните истории се преплитат в роман за женската сила и саможертва.','ogledaloto-na-elena.jpg'],
+  ['Градът без сенки',15.99,'Антиутопия в близко бъдеще, където емоциите са контролирани от технология. Един бунтовник решава да припомни на хората какво е да чувстваш, рискувайки всичко.',null]
+]},
+{id:'c-fan',n:'Фантастика и фентъзи',d:'Нови и класически заглавия от света на въображението.',c:'#1f7a66',g:'linear-gradient(145deg,#1f9d7a,#1a6b56)',t:[
+  ['Звездната порта',11.99,'Космически екип открива портал към далечна галактика, населена с цивилизация, по-стара от Вселената. Но порталът работи и в двете посоки и нещо от другата страна иска да премине.','zvezdnata-porta.jpg'],
+  ['Хрониките на Аурум',19.99,'Епичен фентъзи роман за свят, изграден от злато и магия. Млад ковач открива, че притежава силата да пренаписва законите на реалността, но всяка промяна идва с цена.','hroniките-na-aurum.jpg'],
+  ['Сенките на Орион',8.99,'На борда на космическия кораб „Орион" нещо се събужда в тъмните коридори. Екипажът трябва да разгадае мистерията, преди сенките да ги погълнат. Научна фантастика с елементи на трилър.','senkite-na-orion.jpg'],
+  ['Драконовият код',13.99,'В свят, където драконите са програмирани от древни алгоритми, хакер открива начин да ги контролира. Но истинската заплаха не идва от драконите — идва от тези, които ги създали.','drakonoviyat-kod.jpg'],
+  ['Лунният лабиринт',16.99,'На тъмната страна на Луната се крие лабиринт, построен от извънземна раса. Експедиция от Земята навлиза в него, без да знае, че изходът не е там, откъдето са влезли.','lunniyat-labirint.jpg']
+]},
+{id:'c-razv',n:'Личностно развитие',d:'Психология, навици, финанси — книги, които променят мисленето.',c:'#8d3d52',g:'linear-gradient(145deg,#b8486a,#8d3d52)',t:[
+  ['Малките навици',16.99,'Практично ръководство за изграждане на малки, но мощни ежедневни навици. С научни изследвания и реални примери — как 1% подобрение всеки ден води до огромна промяна за година.','malkite-navitsi.jpg'],
+  ['Спокоен ум',13.99,'Книга за управление на тревожността и стреса в съвременния свят. Медитативни техники, дихателни упражнения и когнитивни стратегии за по-спокоен и фокусиран живот.',null],
+  ['Пари без стрес',24.99,'Финансово ръководство за хора, които искат да контролират парите си, а не обратното. Бюджетиране, спестяване и инвестиране, обяснени просто и достъпно.','pari-bez-stres.jpg'],
+  ['Силата на „Не"',12.99,'Как да казваш „не" без вина и да защитаваш границите си. Книга за себеуважението, приоритетите и изкуството да живееш по собствените си правила.',null],
+  ['Фокус: 4 часа на ден',18.99,'Научно базиран подход за максимална продуктивност в рамките на 4 фокусирани часа. Не работи повече — работи по-умно.','fokus-4-chasa.jpg']
+]},
+{id:'c-det',n:'Детски книги',d:'Приказки и четива за малки читатели (3–12 г.).',c:'#b3741a',g:'linear-gradient(145deg,#d4891e,#b3741a)',t:[
+  ['Лисичето Руми',4.99,'Малкото лисиче Руми тръгва на приключение из гората, за да намери най-вкусната ягода. По пътя среща нови приятели и научава, че споделянето прави всичко по-сладко. За деца 3–6 г.',null],
+  ['Тайната на гората',6.99,'Трима смели приятели — катерица, таралеж и заек — разгадават мистерия в дълбоката гора. Кой краде горските плодове? Забавна детективска история за деца 5–8 г.','taynata-na-gorata.jpg'],
+  ['Малкият астронавт',7.99,'Мартин мечтае да полети в космоса. Една нощ звездите му показват пътя и той преживява невероятно приключение на Луната. Вдъхновяваща книга за мечтите, за деца 4–7 г.',null],
+  ['Принцесата програмистка',8.99,'Принцеса Ада не иска рицар — тя иска код! С логика и креативност решава проблемите на кралството. Забавен начин да запалим интереса на децата към технологиите. 6–10 г.',null],
+  ['Приключения в облаците',5.99,'Когато духне силен вятър, облаците оживяват! Малката Яна лети с тях и открива вълшебен свят. Поетична книга с красиви илюстрации, за деца 3–6 г.',null]
+]},
+{id:'c-ucheb',n:'Учебна литература',d:'Помагала и материали за учене.',c:'#5b3a86',g:'linear-gradient(145deg,#7047a3,#5b3a86)',t:[
+  ['Математика за 5. клас',10.99,'Подробно помагало с обяснения, решени примери и задачи за самостоятелна работа. Обхваща всички теми от учебната програма по математика за 5. клас.','matematika-5-klas.jpg'],
+  ['Граматика стъпка по стъпка',15.99,'Български език без скука. Правила, примери и упражнения, подредени логично и достъпно. Подходящо за ученици от 4. до 7. клас и за всеки, който иска да пише правилно.','gramatika-stapka.jpg'],
+  ['Подготовка за матура',29.99,'Комплексно помагало за подготовка за ДЗИ по български език и литература. Тестове, есета, анализи и стратегии за успешно полагане на изпита.','podgotovka-matura.jpg'],
+  ['Английски за начинаещи',14.99,'Самоучител с основна граматика, лексика и диалози за ежедневни ситуации. Подходящ за възрастни, които започват от нулата, с ясни обяснения на български.',null],
+  ['Физика — формули и задачи',12.99,'Справочник с всички формули от 7. до 12. клас и решени задачи. Незаменим помощник при подготовка за контролни и изпити.',null]
+]},
+{id:'c-tech',n:'Технологии',d:'Програмиране, дизайн, ИТ ръководства.',c:'#3a4a5e',g:'linear-gradient(145deg,#4d6076,#3a4a5e)',t:[
+  ['Първи стъпки в Python',34.99,'От нулата до първия проект. Книгата обхваща основи на Python — променливи, функции, цикли, структури от данни — и завършва с два практически проекта: уеб скрапер и чатбот.','python-parvi-stapki.jpg'],
+  ['Дизайн на уеб сайтове',44.99,'Пълно ръководство за създаване на модерни, адаптивни уеб сайтове. UI/UX принципи, типография, цветове, layout и инструменти — Figma, CSS Grid, Flexbox.',null],
+  ['HTML и CSS от нулата',55.99,'За абсолютни начинаещи: от първия HTML таг до завършен респонсив сайт. 25 практически упражнения и 5 проекта с нарастваща сложност.','html-css-nulata.jpg'],
+  ['JavaScript за всички',39.99,'Научете JavaScript от основите до асинхронно програмиране. С DOM манипулации, fetch API, ES6+ синтаксис и проекти за портфолиото ви.',null],
+  ['Git и GitHub на практика',19.99,'Как да управлявате кода си с Git — от първия commit до pull request. Реални сценарии за екипна работа, branching стратегии и CI/CD основи.',null]
+]}];
+
+var home=document.getElementById('top'),cat=document.getElementById('catalog'),co=document.getElementById('checkout');
+var cart=[];
+try{var r=JSON.parse(localStorage.getItem('wasd-cart')||'[]');if(Array.isArray(r))cart=r.filter(function(x){return x&&typeof x.t==='string'&&typeof x.p==='number'})}catch(e){}
+function save(){try{localStorage.setItem('wasd-cart',JSON.stringify(cart))}catch(e){}}
+function esc(x){return String(x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function f(n){return n.toFixed(2).replace('.',',')+' лв.'}
+function has(t){return cart.some(function(x){return x.t===t})}
+function total(){return cart.reduce(function(a,x){return a+x.p},0)}
+var cur=null,view='home';
+function badge(bump){var b=document.getElementById('cc');b.textContent=cart.length;if(bump){b.classList.remove('bump');void b.offsetWidth;b.classList.add('bump')}}
+
+/* Find book info */
+function findBook(title){
+  for(var i=0;i<C.length;i++){for(var j=0;j<C[i].t.length;j++){if(C[i].t[j][0]===title)return{title:C[i].t[j][0],price:C[i].t[j][1],desc:C[i].t[j][2],img:C[i].t[j][3],cat:C[i].n,color:C[i].c,grad:C[i].g}}}
+  return null;
+}
+
+/* Modal */
+var modal=document.getElementById('modal');
+var modalTitle=document.getElementById('modal-title');
+var modalCover=document.getElementById('modal-cover');
+var modalDesc=document.getElementById('modal-desc');
+var modalCat=document.getElementById('modal-cat');
+var modalPrice=document.getElementById('modal-price');
+var modalAdd=document.getElementById('modal-add');
+var modalBook=null;
+
+function openModal(title){
+  var bk=findBook(title);
+  if(!bk)return;
+  modalBook=bk;
+  modalTitle.textContent=bk.title;
+  if(bk.img){modalCover.innerHTML='<img src="'+IMG+bk.img+'" alt="'+esc(bk.title)+'">'+'<span>'+esc(bk.title)+'</span>'}else{modalCover.innerHTML='<span>'+esc(bk.title)+'</span>'}
+  modalCover.style.background=bk.grad;
+  modalDesc.textContent=bk.desc;
+  modalCat.textContent=bk.cat;
+  modalPrice.textContent=f(bk.price);
+  var inCart=has(bk.title);
+  modalAdd.textContent=inCart?'✓ Вече е в количката':'🛒 Добави в количка';
+  modalAdd.className='modal-add'+(inCart?' in':'');
+  modal.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){
+  modal.classList.remove('open');
+  document.body.style.overflow='';
+  modalBook=null;
+}
+document.getElementById('modal-close').addEventListener('click',closeModal);
+modal.addEventListener('click',function(e){if(e.target===modal)closeModal()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&modal.classList.contains('open'))closeModal()});
+modalAdd.addEventListener('click',function(){
+  if(!modalBook)return;
+  if(!has(modalBook.title)){
+    cart.push({t:modalBook.title,p:modalBook.price});save();badge(true);shelf();
+    modalAdd.textContent='✓ Вече е в количката';
+    modalAdd.classList.add('in');
+  }else{
+    closeModal();location.hash='#checkout';
+  }
+});
+
+function shelf(){
+  var out='';
+  (cur?[cur]:C).forEach(function(x){x.t.forEach(function(it){var t=it[0],p=it[1],im=it[3],i=has(t);
+    var cvInner=im?'<img src="'+IMG+im+'" alt="'+esc(t)+'" loading="lazy"><span>'+esc(t)+'</span>':'<span>'+esc(t)+'</span>';
+    out+='<article class="item"><div class="cv" style="background:'+x.g+'">'+cvInner+'</div><div><h3>'+esc(t)+'</h3><p>'+esc(x.n)+' · EPUB, PDF</p></div><p class="pr">'+f(p)+'</p><div class="item-btns"><button type="button" class="add-btn'+(i?' in':'')+'" data-t="'+esc(t)+'" data-p="'+p+'">'+(i?'✓ В количката':'🛒 Добави')+'</button><button type="button" class="browse-btn" data-browse="'+esc(t)+'">📖 Разгледай</button></div></article>'})});
+  document.getElementById('shelf').innerHTML=out;
+}
+
+function lines(){
+  var l='';cart.forEach(function(x){l+='<li><span>'+esc(x.t)+'<small>EPUB, PDF</small><button type="button" class="rm" data-rm="'+esc(x.t)+'">✕ Премахни</button></span><b>'+f(x.p)+'</b></li>'});
+  document.getElementById('lines').innerHTML=l;
+  document.getElementById('tot').textContent=f(total());
+  document.getElementById('empty').hidden=cart.length>0;
+  document.getElementById('cof').hidden=cart.length===0;
+}
+
+function route(){
+  var h=location.hash;cur=C.filter(function(x){return '#'+x.id===h})[0]||null;
+  home.hidden=cat.hidden=co.hidden=true;
+  if(h==='#all'||cur){
+    view='cat';cat.hidden=false;
+    document.getElementById('ct').textContent=cur?cur.n:'Нашите произведения';
+    document.getElementById('cd').textContent=cur?cur.d:'Всички категории на едно място.';
+    var ch='<a class="chip2'+(cur?'':' on')+'" href="#all">Всички</a>';
+    C.forEach(function(x){ch+='<a class="chip2'+(x===cur?' on':'')+'" href="#'+x.id+'">'+esc(x.n)+'</a>'});
+    document.getElementById('chips').innerHTML=ch;shelf();
+    document.title=(cur?cur.n:'Произведения')+' – WASD Enterprise';window.scrollTo(0,0);
+  }else if(h==='#checkout'){
+    view='co';co.hidden=false;lines();document.title='Поръчка – WASD Enterprise';window.scrollTo(0,0);
+  }else{
+    var was=view!=='home';view='home';home.hidden=false;
+    document.title='WASD Enterprise – дигитални книги онлайн';
+    if(was){var el=h.length>1&&document.getElementById(h.slice(1));if(el){el.scrollIntoView()}else{window.scrollTo(0,0)}}
+  }
+}
+
+document.addEventListener('click',function(e){
+  var a=e.target.closest&&e.target.closest('[data-t]');
+  var r=e.target.closest&&e.target.closest('[data-rm]');
+  var br=e.target.closest&&e.target.closest('[data-browse]');
+  if(a){var t=a.getAttribute('data-t');if(!has(t)){cart.push({t:t,p:parseFloat(a.getAttribute('data-p'))});save();badge(true);shelf()}else{location.hash='#checkout'}}
+  if(r){var t2=r.getAttribute('data-rm');cart=cart.filter(function(x){return x.t!==t2});save();badge(false);lines()}
+  if(br){e.preventDefault();openModal(br.getAttribute('data-browse'))}
+});
+
+/* SumUp checkout */
+document.getElementById('cof').addEventListener('submit',function(e){
+  e.preventDefault();if(!cart.length)return;
+  var nm=document.getElementById('nm').value;
+  var em=document.getElementById('em').value;
+  /* Build SumUp Pay link — replace MERCHANT_CODE with your real SumUp merchant code */
+  var amount=total().toFixed(2);
+  var desc=cart.map(function(x){return x.t}).join(', ');
+  var sumupUrl='https://pay.sumup.com/b2c/MEBCSZ61'
+    +'?amount='+amount
+    +'&currency=BGN'
+    +'&title='+encodeURIComponent('WASD Enterprise – Дигитални книги')
+    +'&description='+encodeURIComponent(desc)
+    +'&email='+encodeURIComponent(em)
+    +'&name='+encodeURIComponent(nm);
+  document.getElementById('okm').classList.add('show');
+  /* Redirect to SumUp payment page */
+  window.open(sumupUrl,'_blank');
+});
+
+window.addEventListener('hashchange',route);badge(false);route();
+})();
+</script>
+</body>
+</html>
